@@ -1,4 +1,3 @@
-
 import { Builder, Capabilities, By } from "selenium-webdriver"
 
 require('chromedriver')
@@ -29,9 +28,31 @@ test('Draw button works', async () => {
 
 test('select bot button works', async () => {
     await driver.findElement(By.id('draw')).click()
-    await driver.findElement(By.xpath("//div[contains(@class, 'bot-btn')]"))
-    const playerDuo = driver.findElement(By.id('player-duo'))
+    await driver.findElement(By.xpath("//*[@id='choices']/div[3]/button")).click()
+    const playerDuo = await driver.findElement(By.id('player-duo'))
     const displayed = await playerDuo.isDisplayed()
 
     expect(displayed).toBe(true)
 })
+
+test('select bot button works but scotts', async () => {
+    await driver.findElement(By.id('draw')).click()
+
+    await driver.findElement(By.xpath('//button[text()="Add to Duo"][1]')).click()
+
+    const playerDuo = await driver.findElement(By.id('player-duo'))
+
+    const displayed = await playerDuo.isDisplayed()
+
+    expect(displayed).toBe(true)
+})
+
+test('when bot is removed, it goes back to choices', async () => {
+    await driver.findElement(By.id('draw')).click()
+    await driver.findElement(By.xpath('(//button[text()="Add to Duo"])[1]')).click()
+    await driver.findElement(By.xpath('(//button[text()="Remove from Duo"])')).click()
+
+    const returnedCard = await driver.findElement(By.xpath('//*[@id="choices"]/div[5]'))
+    const displayed = await returnedCard.isDisplayed()
+    expect(displayed).toBe(true)
+});

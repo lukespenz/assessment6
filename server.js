@@ -4,11 +4,31 @@ const app = express()
 const {bots, playerRecord} = require('./data')
 const {shuffleArray} = require('./utils')
 
-app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.html'))})
-app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.js'))})
-app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.css'))})
-
 app.use(express.static('public'))
+
+//app.use('/static', express.static(path.join(__dirname, 'public'))) //--- to serve files statically
+
+// do this ^ so you don't need to do all these v (remember to add /static to the begining of your .js and .css files inside your html)
+app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.html'))
+    rollbar.info('html file served successfully')
+})
+app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.js'))
+    rollbar.info('js file served successfully')
+})
+app.get('/', (req, res) => {res.sendFile(path.join(__dirname, '/public/index.css'))
+rollbar.info('css file served successfully')
+})
+
+// include and initialize the rollbar library with your access token
+var Rollbar = require('rollbar')
+var rollbar = new Rollbar({
+  accessToken: '363787fac76149298be86a223572f3de',
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+})
+
+// record a generic message and send it to Rollbar
+rollbar.log('Hello world!')
 
 app.use(express.json())
 
@@ -16,7 +36,7 @@ app.get('/api/robots', (req, res) => {
     try {
         res.status(200).send(botsArr)
     } catch (error) {
-        console.log('ERROR GETTING BOTS', error)
+        rollbar.error('ERROR GETTING BOTS', error)
         res.sendStatus(400)
     }
 })
@@ -28,7 +48,7 @@ app.get('/api/robots/five', (req, res) => {
         let compDuo = shuffled.slice(6, 8)
         res.status(200).send({choices, compDuo})
     } catch (error) {
-        console.log('ERROR GETTING FIVE BOTS', error)
+        rollbar.error('ERROR GETTING FIVE BOTS', error)
         res.sendStatus(400)
     }
 })
@@ -59,7 +79,7 @@ app.post('/api/duel', (req, res) => {
             res.status(200).send('You won!')
         }
     } catch (error) {
-        console.log('ERROR DUELING', error)
+        rollbar.critical('ERROR DUELING', error)
         res.sendStatus(400)
     }
 })
@@ -68,7 +88,7 @@ app.get('/api/player', (req, res) => {
     try {
         res.status(200).send(playerRecord)
     } catch (error) {
-        console.log('ERROR GETTING PLAYER STATS', error)
+        rollbar.warning('ERROR GETTING PLAYER STATS', error)
         res.sendStatus(400)
     }
 })
